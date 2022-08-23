@@ -4,6 +4,7 @@ import android.content.Context
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.login.LoginViewModel
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import org.koin.android.ext.koin.androidContext
@@ -25,5 +26,6 @@ object Koin {
         single<ReminderDataSource> { RemindersLocalRepository(get()) }
         viewModelOf(::RemindersListViewModel)
         viewModelOf(::SaveReminderViewModel)
+        viewModelOf(::LoginViewModel)
     }
 }
