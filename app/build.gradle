@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 
 android {
@@ -31,19 +30,17 @@ android {
         returnDefaultValues = true
     }
 
-    //dataBinding {
-    //    enabled = true
-    //    enabledForTests = true
-    //}
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation("androidx.multidex:multidex:2.0.1")
+    implementation "androidx.core:core-ktx:1.8.0"
+    implementation "androidx.multidex:multidex:2.0.1"
 
     // App dependencies
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
@@ -107,12 +104,11 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
     androidTestImplementation "junit:junit:$junitVersion"
-    testImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
+    debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
     implementation "androidx.test:core:$androidXTestCoreVersion"
-    implementation "androidx.fragment:fragment:$fragmentVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
     androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:$dexMakerVersion"
-    androidTestImplementation('org.koin:koin-test:2.0.1') { exclude group: 'org.mockito' }
-
+    testImplementation "io.insert-koin:koin-test:$koinVersion"
 
 }
