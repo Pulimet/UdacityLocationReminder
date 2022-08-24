@@ -46,6 +46,7 @@ class LoginViewModel(private val getResource: GetResource) : ViewModel() {
             logI("User not signed in")
         } else {
             logI("User already signed in ${currentUser.displayName}!")
+            navigateToReminderList()
             _loginBtnText.value = getResource.getString(R.string.logout)
         }
     }
@@ -70,11 +71,15 @@ class LoginViewModel(private val getResource: GetResource) : ViewModel() {
             Activity.RESULT_OK -> {
                 val displayName = FirebaseAuth.getInstance().currentUser?.displayName
                 logI("Successfully signed in user $displayName!")
-                navViewModel.navigateTo(LoginFragmentDirections.actionLoginFragmentToReminderListFragment())
+                navigateToReminderList()
             }
             Activity.RESULT_CANCELED -> logI("Sign in unsuccessful ${result.idpResponse?.error?.errorCode}")
             else -> logI("Sign in unsuccessful ${result.idpResponse?.error?.errorCode}")
         }
+    }
+
+    private fun navigateToReminderList() {
+        navViewModel.navigateTo(LoginFragmentDirections.actionLoginFragmentToReminderListFragment())
     }
 
     fun onLogoutCompleted() {
