@@ -8,7 +8,6 @@ import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.snackbar.Snackbar
@@ -56,18 +55,18 @@ class ReminderListFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel.showErrorMessage.observe(viewLifecycleOwner, Observer {
+        viewModel.showErrorMessage.observe(viewLifecycleOwner) {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
-        })
-        viewModel.showToast.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.showToast.observe(viewLifecycleOwner) {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
-        })
-        viewModel.showSnackBar.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.showSnackBar.observe(viewLifecycleOwner) {
             Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG).show()
-        })
-        viewModel.showSnackBarInt.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.showSnackBarInt.observe(viewLifecycleOwner) {
             Snackbar.make(requireView(), getString(it), Snackbar.LENGTH_LONG).show()
-        })
+        }
     }
 
     private fun setupMenu() {
