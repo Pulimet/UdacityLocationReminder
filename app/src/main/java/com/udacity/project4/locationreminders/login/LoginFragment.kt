@@ -7,27 +7,31 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentLoginBinding
+import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.FragmentBinding
 import com.udacity.project4.utils.collectIt
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginFragment : Fragment(R.layout.fragment_login), View.OnClickListener {
     private val binding by FragmentBinding(FragmentLoginBinding::bind)
-    private val loginViewModel: LoginViewModel by inject()
+    private val viewModel by viewModel<LoginViewModel>()
+    private val navViewModel by sharedViewModel<NavViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.navViewModel = navViewModel
         observeViewModels()
         binding.btnLogin.setOnClickListener(this)
     }
 
     override fun onResume() {
         super.onResume()
-        loginViewModel.onResume()
+        viewModel.onResume()
     }
 
     private fun observeViewModels() {
-        loginViewModel.apply {
+        viewModel.apply {
             loginBtnText.collectIt(viewLifecycleOwner) { binding.btnLogin.text = it }
             launchSignInIntent.collectIt(viewLifecycleOwner) { signInLauncher.launch(it) }
             launchSignOut.collectIt(viewLifecycleOwner) { logout() }
@@ -37,20 +41,20 @@ class LoginFragment : Fragment(R.layout.fragment_login), View.OnClickListener {
     // View.OnClickListener
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.btnLogin -> loginViewModel.onBtnLoginOrLogoutClick()
+            R.id.btnLogin -> viewModel.onBtnLoginOrLogoutClick()
         }
     }
 
     // SignIn/Logout code
     private val signInLauncher = registerForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-        loginViewModel.onSignInResult(result)
+        viewModel.onSignInResult(result)
     }
 
     private fun logout() {
         AuthUI.getInstance()
             .signOut(requireContext())
             .addOnCompleteListener {
-                loginViewModel.onLogoutCompleted()
+                viewModel.onLogoutCompleted()
             }
     }
 }

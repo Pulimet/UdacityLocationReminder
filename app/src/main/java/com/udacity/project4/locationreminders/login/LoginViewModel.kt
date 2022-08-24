@@ -21,7 +21,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val navViewModel: NavViewModel, private val getResource: GetResource) : ViewModel() {
+class LoginViewModel(private val getResource: GetResource) : ViewModel() {
+
+    lateinit var navViewModel: NavViewModel
 
     private val _loginBtnText = MutableStateFlow(getResource.getString(R.string.login))
     val loginBtnText = _loginBtnText.asStateFlow()
