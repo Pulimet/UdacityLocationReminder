@@ -17,7 +17,7 @@ object Logger {
     private const val tag: String = "MyLog"
 
     private const val isThreadNameVisible = false
-    private const val isTimeVisible = true
+    private const val isTimeVisible = false
     private const val isPackageNameVisible = false
     private const val isClassNameVisible = true
     private const val isMethodNameVisible = true

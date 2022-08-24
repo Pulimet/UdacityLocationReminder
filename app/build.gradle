@@ -52,10 +52,15 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
 
     implementation platform('com.google.firebase:firebase-bom:30.3.2')
-    implementation 'com.google.firebase:firebase-auth:21.0.7'
+
+    // Authentication dependencies
+    implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:8.0.1'
+    implementation 'com.google.android.gms:play-services-auth:20.2.0'
+
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"
     implementation "com.google.android.gms:play-services-maps:18.1.0"
 
@@ -78,6 +83,9 @@ dependencies {
 
     //Koin
     implementation "io.insert-koin:koin-android:$koinVersion"
+
+
+    // Test dependencies below
 
     // Dependencies for local unit tests
     testImplementation "junit:junit:$junitVersion"
@@ -109,7 +117,6 @@ dependencies {
     androidTestImplementation "junit:junit:$junitVersion"
     debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
     implementation "androidx.test:core:$androidXTestCoreVersion"
-    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
     androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:$dexMakerVersion"
     testImplementation "io.insert-koin:koin-test:$koinVersion"

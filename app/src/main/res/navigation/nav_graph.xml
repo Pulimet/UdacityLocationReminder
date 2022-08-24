@@ -9,7 +9,11 @@
         android:id="@+id/loginFragment"
         android:name="com.udacity.project4.locationreminders.login.LoginFragment"
         android:label="Login"
-        tools:layout="@layout/fragment_login" />
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_reminderListFragment"
+            app:destination="@id/reminderListFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/reminderListFragment"
