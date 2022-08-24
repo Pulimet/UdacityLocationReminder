@@ -5,11 +5,11 @@ import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
-import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -17,23 +17,27 @@ import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ReminderListFragment : BaseFragment(), MenuProvider {
-    override val _viewModel: RemindersListViewModel by viewModel()
+class ReminderListFragment : Fragment(), MenuProvider {
+    val viewModel by viewModel<RemindersListViewModel>()
+
     private lateinit var binding: FragmentRemindersBinding
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
+        setupBinding(inflater, container)
+        setDisplayHomeAsUpEnabled(false)
+        setTitle(getString(R.string.app_name))
+
+        binding.refreshLayout.setOnRefreshListener { viewModel.loadReminders() }
+
+        return binding.root
+    }
+
+    private fun setupBinding(inflater: LayoutInflater, container: ViewGroup?) {
         binding =
             DataBindingUtil.inflate(
                 inflater,
                 R.layout.fragment_reminders, container, false
             )
-        binding.viewModel = _viewModel
-
-        setDisplayHomeAsUpEnabled(false)
-        setTitle(getString(R.string.app_name))
-
-        binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
-
-        return binding.root
+        binding.viewModel = viewModel
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,12 +55,12 @@ class ReminderListFragment : BaseFragment(), MenuProvider {
     override fun onResume() {
         super.onResume()
         //load the reminders list on the ui
-        _viewModel.loadReminders()
+        viewModel.loadReminders()
     }
 
     private fun navigateToAddReminder() {
         //use the navigationCommand live data to navigate between the fragments
-        _viewModel.navigationCommand.postValue(
+        viewModel.navigationCommand.postValue(
             NavigationCommand.To(
                 ReminderListFragmentDirections.toSaveReminder()
             )
