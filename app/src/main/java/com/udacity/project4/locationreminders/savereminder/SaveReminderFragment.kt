@@ -12,6 +12,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.navigation.NavViewModel
+import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -23,6 +24,7 @@ class SaveReminderFragment : Fragment() {
     private lateinit var binding: FragmentSaveReminderBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
+        logD("ViewModel: $viewModel")
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_save_reminder, container, false)
         binding.viewModel = viewModel
         setDisplayHomeAsUpEnabled(true)

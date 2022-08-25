@@ -3,26 +3,29 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
-class SelectLocationFragment : Fragment() {
+class SelectLocationFragment : Fragment(), MenuProvider {
 
-    //Use Koin to get the view model of the SaveReminder
     val viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
+        logD("ViewModel: $viewModel")
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
 
-        setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
 //        TODO: add the map setup implementation
@@ -37,19 +40,28 @@ class SelectLocationFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupMenu()
+    }
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
     private fun onLocationSelected() {
         //        TODO: When the user confirms on the selected location,
         //         send back the selected location details to the view model
         //         and navigate back to the previous fragment to save the reminder and add the geofence
     }
 
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.map_options, menu)
+    // MenuProvider
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.map_options, menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        // TODO: Change the map type based on the user's selection.
+    override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
         R.id.normal_map -> {
             true
         }
@@ -62,8 +74,6 @@ class SelectLocationFragment : Fragment() {
         R.id.terrain_map -> {
             true
         }
-        else -> super.onOptionsItemSelected(item)
+        else -> false
     }
-
-
 }

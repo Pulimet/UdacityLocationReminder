@@ -93,15 +93,14 @@ class ReminderListFragment : Fragment(), MenuProvider {
         menuInflater.inflate(R.menu.main_menu, menu)
     }
 
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return when (menuItem.itemId) {
-            R.id.logout -> {
-                logout()
-                true
-            }
-            else -> false
+    override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+        R.id.logout -> {
+            logout()
+            true
         }
+        else -> false
     }
+
 
     private fun logout() {
         AuthUI.getInstance()
