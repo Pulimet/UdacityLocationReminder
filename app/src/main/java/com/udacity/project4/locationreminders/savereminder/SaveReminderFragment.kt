@@ -9,17 +9,15 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
-import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class SaveReminderFragment : Fragment() {
     //Get the view model this time as a single to be shared with the another fragment
-    val viewModel: SaveReminderViewModel by inject()
+    private val viewModel by sharedViewModel<SaveReminderViewModel>()
     private val navViewModel by sharedViewModel<NavViewModel>()
     private lateinit var binding: FragmentSaveReminderBinding
 

@@ -95,11 +95,22 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         return true
     }
 
-    fun onLocationSelected(latLng: LatLng?) {
-        latLng?.let {
-            latitude.value = latLng.latitude
-            longitude.value = latLng.longitude
+    fun onLocationSelected() {
+        if (latitude.value != null && latitude.value != null) {
             navViewModel.navigateUp()
         }
+    }
+
+    fun updateLatLng(latLng: LatLng) {
+        latitude.value = latLng.latitude
+        longitude.value = latLng.longitude
+        val latStr = latLng.latitude.toString().substring(0, 8)
+        val longStr = latLng.longitude.toString().substring(0, 8)
+        reminderSelectedLocationStr.value = "$latStr : $longStr"
+    }
+
+    fun updatePoi(poi: PointOfInterest) {
+        selectedPOI.value = poi
+        reminderSelectedLocationStr.value = poi.name
     }
 }

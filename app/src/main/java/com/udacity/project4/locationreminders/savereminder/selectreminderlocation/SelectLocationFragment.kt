@@ -28,7 +28,6 @@ import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.logW
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 
@@ -38,11 +37,10 @@ class SelectLocationFragment : Fragment(),
     GoogleMap.OnPoiClickListener,
     GoogleMap.OnMapClickListener {
 
-    val viewModel: SaveReminderViewModel by inject()
+    private val viewModel by sharedViewModel<SaveReminderViewModel>()
     private val navViewModel by sharedViewModel<NavViewModel>()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var map: GoogleMap
-    private var latLng: LatLng? = null
     private var marker: Marker? = null
     private var circle: Circle? = null
 
@@ -93,7 +91,7 @@ class SelectLocationFragment : Fragment(),
     }
 
     private fun onLocationSelected() {
-        viewModel.onLocationSelected(latLng)
+        viewModel.onLocationSelected()
     }
 
     // OnMapReadyCallback
@@ -108,14 +106,15 @@ class SelectLocationFragment : Fragment(),
 
     // GoogleMap.OnPoiClickListener
     override fun onPoiClick(poi: PointOfInterest) {
-        latLng = poi.latLng
+        viewModel.updateLatLng(poi.latLng)
+        viewModel.updatePoi(poi)
         removeAndAddMarker(poi.latLng, poi.name)
         removeAndAddCircle(poi.latLng)
     }
 
     // GoogleMap.OnMapClickListener
     override fun onMapClick(latLng: LatLng) {
-        this.latLng = latLng
+        viewModel.updateLatLng(latLng)
         removeAndAddMarker(latLng)
         removeAndAddCircle(latLng)
     }
