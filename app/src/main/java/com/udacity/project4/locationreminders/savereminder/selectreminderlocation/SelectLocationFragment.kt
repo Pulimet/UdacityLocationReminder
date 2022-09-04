@@ -24,6 +24,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.logD
+import com.udacity.project4.utils.logW
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -39,8 +40,18 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     private var circle: Circle? = null
 
     private val activityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            handlePermissionsResult(isGranted)
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    handlePermissionsResult(true) // Precise location access granted.
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    handlePermissionsResult(true)// Only approximate location access granted.
+                }
+                else -> {
+                    handlePermissionsResult(false)// No location access granted.
+                }
+            }
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
@@ -112,9 +123,11 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
         if (isPermissionGranted()) {
+            logD("Location permissions granted")
             map.isMyLocationEnabled = true
             moveCameraToCurrentLocation()
         } else {
+            logW("Location permissions not granted")
             requestPermission()
         }
     }
@@ -139,12 +152,20 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
 
     // Permissions
     private fun requestPermission() {
-        activityResultLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        logW("")
+        activityResultLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
     }
 
     private fun handlePermissionsResult(granted: Boolean) {
         if (granted) {
             enableMyLocation()
+        } else {
+            // TODO Show message
         }
     }
 
