@@ -32,7 +32,11 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 
-class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnPoiClickListener {
+class SelectLocationFragment : Fragment(),
+    MenuProvider,
+    OnMapReadyCallback,
+    GoogleMap.OnPoiClickListener,
+    GoogleMap.OnMapClickListener {
 
     val viewModel: SaveReminderViewModel by inject()
     private val navViewModel by sharedViewModel<NavViewModel>()
@@ -97,6 +101,7 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
         map = maps.apply {
             setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style))
             setOnPoiClickListener(this@SelectLocationFragment)
+            setOnMapClickListener(this@SelectLocationFragment)
         }
         enableMyLocation()
     }
@@ -108,12 +113,20 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
         removeAndAddCircle(poi.latLng)
     }
 
-    private fun removeAndAddMarker(latLng: LatLng, poiName: String) {
+    // GoogleMap.OnMapClickListener
+    override fun onMapClick(latLng: LatLng) {
+        this.latLng = latLng
+        removeAndAddMarker(latLng)
+        removeAndAddCircle(latLng)
+    }
+
+    private fun removeAndAddMarker(latLng: LatLng, poiName: String = "") {
+        val name = if (poiName.isNotEmpty()) ": $poiName" else ""
         marker?.remove()
         marker = map.addMarker(
             MarkerOptions()
                 .position(latLng)
-                .title(getString(R.string.selected_position) + ": $poiName")
+                .title(getString(R.string.selected_position) + name)
         )?.apply {
             showInfoWindow()
         }
@@ -124,7 +137,7 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
         circle = map.addCircle(
             CircleOptions()
                 .center(latLng)
-                .radius(100.0)
+                .radius(120.0)
                 .strokeColor(ContextCompat.getColor(requireContext(), R.color.circle_stroke))
                 .fillColor(ContextCompat.getColor(requireContext(), R.color.circle_fill))
         )
