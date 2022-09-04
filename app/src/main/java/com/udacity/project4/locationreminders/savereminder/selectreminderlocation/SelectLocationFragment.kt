@@ -132,19 +132,14 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback {
         menuInflater.inflate(R.menu.map_options, menu)
     }
 
-    override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
-        R.id.normal_map -> {
-            true
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.normal_map -> map.mapType = GoogleMap.MAP_TYPE_NORMAL
+            R.id.hybrid_map -> map.mapType = GoogleMap.MAP_TYPE_HYBRID
+            R.id.satellite_map -> map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+            R.id.terrain_map -> map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+            else -> return false
         }
-        R.id.hybrid_map -> {
-            true
-        }
-        R.id.satellite_map -> {
-            true
-        }
-        R.id.terrain_map -> {
-            true
-        }
-        else -> false
+        return true
     }
 }
