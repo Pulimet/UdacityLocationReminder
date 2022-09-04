@@ -4,6 +4,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,7 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.*
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
@@ -26,11 +27,13 @@ import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
-class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback {
+class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     val viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var map: GoogleMap
+    private var marker: Marker? = null
+    private var circle: Circle? = null
 
     private val activityResultLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -61,12 +64,6 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback {
 
     private fun setupMap() {
         binding.map.getFragment<SupportMapFragment>().getMapAsync(this)
-//        TODO: add style to the map
-//        TODO: put a marker to location that the user selected
-
-
-//        TODO: call this function after the user confirms on the selected location
-        onLocationSelected()
     }
 
     private fun onLocationSelected() {
@@ -77,8 +74,32 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback {
 
     // OnMapReadyCallback
     override fun onMapReady(maps: GoogleMap) {
-        map = maps
+        map = maps.apply {
+            setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style))
+            setOnMapClickListener(this@SelectLocationFragment)
+        }
         enableMyLocation()
+    }
+
+    // GoogleMap.OnMapClickListener
+    override fun onMapClick(latLng: LatLng) {
+        marker?.remove()
+        marker = map.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .title("Selected position")
+        )?.apply {
+            showInfoWindow()
+        }
+
+        circle?.remove()
+        circle = map.addCircle(
+            CircleOptions()
+                .center(latLng)
+                .radius(100.0)
+                .strokeColor(Color.parseColor("#55000000"))
+                .fillColor(Color.parseColor("#22000000"))
+        )
     }
 
     // Location
