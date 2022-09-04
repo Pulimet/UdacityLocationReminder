@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -28,6 +29,7 @@ import com.udacity.project4.utils.logW
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+
 
 class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -122,13 +124,13 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     // Location
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
-        if (isPermissionGranted()) {
+        if (isLocationPermissionGranted()) {
             logD("Location permissions granted")
             map.isMyLocationEnabled = true
             moveCameraToCurrentLocation()
         } else {
             logW("Location permissions not granted")
-            requestPermission()
+            permissionCheckFlow()
         }
     }
 
@@ -151,8 +153,35 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     }
 
     // Permissions
-    private fun requestPermission() {
+    private fun permissionCheckFlow() {
         logW("")
+        when {
+            isLocationPermissionGranted() -> handlePermissionsResult(true)
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
+                showDialogWithPermissionRationale()
+            else -> requestPermission()
+        }
+    }
+
+    private fun showDialogWithPermissionRationale() {
+        AlertDialog.Builder(requireActivity()).apply {
+            setMessage(getString(R.string.location_permission_rationale))
+            setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                requestPermission()
+            }
+            create().show()
+        }
+    }
+
+    private fun isLocationPermissionGranted() = ContextCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    private fun requestPermission() {
         activityResultLauncher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -165,14 +194,8 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
         if (granted) {
             enableMyLocation()
         } else {
-            // TODO Show message
+            showDialogWithPermissionRationale()
         }
-    }
-
-    private fun isPermissionGranted(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     // MenuProvider

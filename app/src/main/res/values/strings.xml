@@ -46,4 +46,5 @@
     <string name="desc_fab_add_location_reminder">Add location reminder</string>
     <string name="desc_save_location_reminder">Save location reminder</string>
     <string name="selected_position">Selected position</string>
+    <string name="location_permission_rationale">We need the location permission to be able showing your current location</string>
 </resources>
