@@ -20,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
@@ -31,7 +32,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 
-class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnMapClickListener {
+class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnPoiClickListener {
 
     val viewModel: SaveReminderViewModel by inject()
     private val navViewModel by sharedViewModel<NavViewModel>()
@@ -75,6 +76,7 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
         binding.saveLocation.setOnClickListener {
             onLocationSelected()
         }
+        Snackbar.make(view, getString(R.string.select_poi_please), Snackbar.LENGTH_SHORT).show()
     }
 
     private fun setupMenu() {
@@ -94,23 +96,30 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     override fun onMapReady(maps: GoogleMap) {
         map = maps.apply {
             setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style))
-            setOnMapClickListener(this@SelectLocationFragment)
+            setOnPoiClickListener(this@SelectLocationFragment)
         }
         enableMyLocation()
     }
 
-    // GoogleMap.OnMapClickListener
-    override fun onMapClick(latLng: LatLng) {
-        this.latLng = latLng
+    // GoogleMap.OnPoiClickListener
+    override fun onPoiClick(poi: PointOfInterest) {
+        latLng = poi.latLng
+        removeAndAddMarker(poi.latLng, poi.name)
+        removeAndAddCircle(poi.latLng)
+    }
+
+    private fun removeAndAddMarker(latLng: LatLng, poiName: String) {
         marker?.remove()
         marker = map.addMarker(
             MarkerOptions()
                 .position(latLng)
-                .title(getString(R.string.selected_position))
+                .title(getString(R.string.selected_position) + ": $poiName")
         )?.apply {
             showInfoWindow()
         }
+    }
 
+    private fun removeAndAddCircle(latLng: LatLng) {
         circle?.remove()
         circle = map.addCircle(
             CircleOptions()
