@@ -36,17 +36,8 @@ class SaveReminderFragment : Fragment() {
         binding.selectLocation.setOnClickListener {
             viewModel.onSelectLocationClick()
         }
-
         binding.saveReminder.setOnClickListener {
-            val title = viewModel.reminderTitle.value
-            val description = viewModel.reminderDescription
-            val location = viewModel.reminderSelectedLocationStr.value
-            val latitude = viewModel.latitude
-            val longitude = viewModel.longitude.value
-
-//            TODO: use the user entered reminder details to:
-//             1) add a geofencing request
-//             2) save the reminder to the local db
+            viewModel.onSaveReminderClick()
         }
 
         observeViewModel()
