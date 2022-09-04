@@ -4,7 +4,6 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,15 +22,19 @@ import com.google.android.gms.maps.model.*
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     val viewModel: SaveReminderViewModel by inject()
+    private val navViewModel by sharedViewModel<NavViewModel>()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var map: GoogleMap
+    private var latLng: LatLng? = null
     private var marker: Marker? = null
     private var circle: Circle? = null
 
@@ -53,8 +56,12 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.navViewModel = navViewModel
         setupMenu()
         setupMap()
+        binding.saveLocation.setOnClickListener {
+            onLocationSelected()
+        }
     }
 
     private fun setupMenu() {
@@ -67,9 +74,7 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
     }
 
     private fun onLocationSelected() {
-        //        TODO: When the user confirms on the selected location,
-        //         send back the selected location details to the view model
-        //         and navigate back to the previous fragment to save the reminder and add the geofence
+        viewModel.onLocationSelected(latLng)
     }
 
     // OnMapReadyCallback
@@ -83,11 +88,12 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
 
     // GoogleMap.OnMapClickListener
     override fun onMapClick(latLng: LatLng) {
+        this.latLng = latLng
         marker?.remove()
         marker = map.addMarker(
             MarkerOptions()
                 .position(latLng)
-                .title("Selected position")
+                .title(getString(R.string.selected_position))
         )?.apply {
             showInfoWindow()
         }
@@ -97,8 +103,8 @@ class SelectLocationFragment : Fragment(), MenuProvider, OnMapReadyCallback, Goo
             CircleOptions()
                 .center(latLng)
                 .radius(100.0)
-                .strokeColor(Color.parseColor("#55000000"))
-                .fillColor(Color.parseColor("#22000000"))
+                .strokeColor(ContextCompat.getColor(requireContext(), R.color.circle_stroke))
+                .fillColor(ContextCompat.getColor(requireContext(), R.color.circle_fill))
         )
     }
 

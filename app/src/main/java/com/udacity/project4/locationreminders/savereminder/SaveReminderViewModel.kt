@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.ReminderDataSource
@@ -92,5 +93,13 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
             return false
         }
         return true
+    }
+
+    fun onLocationSelected(latLng: LatLng?) {
+        latLng?.let {
+            latitude.value = latLng.latitude
+            longitude.value = latLng.longitude
+            navViewModel.navigateUp()
+        }
     }
 }

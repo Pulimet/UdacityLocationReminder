@@ -44,4 +44,6 @@
     <string name="welcome_login_fragment">Welcome to the location reminder app</string>
     <string name="btn_login">Login</string>
     <string name="desc_fab_add_location_reminder">Add location reminder</string>
+    <string name="desc_save_location_reminder">Save location reminder</string>
+    <string name="selected_position">Selected position</string>
 </resources>

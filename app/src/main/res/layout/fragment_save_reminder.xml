@@ -75,7 +75,8 @@
             app:fabSize="normal"
             app:layout_anchorGravity="bottom|right|end"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@string/desc_save_location_reminder" />
 
         <ProgressBar
             android:id="@+id/progressBar"
