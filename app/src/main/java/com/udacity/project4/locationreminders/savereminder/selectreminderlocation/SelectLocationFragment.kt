@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
@@ -37,6 +38,8 @@ class SelectLocationFragment : Fragment(),
     GoogleMap.OnPoiClickListener,
     GoogleMap.OnMapClickListener {
 
+    private val runningQOrLater = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+
     private val viewModel by sharedViewModel<SaveReminderViewModel>()
     private val navViewModel by sharedViewModel<NavViewModel>()
     private lateinit var binding: FragmentSelectLocationBinding
@@ -44,18 +47,16 @@ class SelectLocationFragment : Fragment(),
     private var marker: Marker? = null
     private var circle: Circle? = null
 
+    @TargetApi(29)
     private val activityResultLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            when {
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    handlePermissionsResult(true) // Precise location access granted.
-                }
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    handlePermissionsResult(true)// Only approximate location access granted.
-                }
-                else -> {
-                    handlePermissionsResult(false)// No location access granted.
-                }
+            val isFineLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)
+            val isCoarseLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)
+            if (runningQOrLater) {
+                val isBGLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false)
+                handlePermissionsResult((isCoarseLocationGranted || isFineLocationGranted) && isBGLocationGranted)
+            } else {
+                handlePermissionsResult(isCoarseLocationGranted || isFineLocationGranted)
             }
         }
 
@@ -180,6 +181,8 @@ class SelectLocationFragment : Fragment(),
             isLocationPermissionGranted() -> handlePermissionsResult(true)
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
                 showDialogWithPermissionRationale()
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION) ->
+                showDialogWithPermissionRationale()
             else -> requestPermission()
         }
     }
@@ -197,18 +200,27 @@ class SelectLocationFragment : Fragment(),
         }
     }
 
-    private fun isLocationPermissionGranted() = ContextCompat.checkSelfPermission(
-        requireContext(),
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
+    @TargetApi(29)
+    private fun isLocationPermissionGranted() =
+        ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
+    @TargetApi(29)
     private fun requestPermission() {
-        activityResultLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
+        var arrayOfPermissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
+        if (runningQOrLater) {
+            arrayOfPermissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        }
+        activityResultLauncher.launch(arrayOfPermissions)
     }
 
     private fun handlePermissionsResult(granted: Boolean) {

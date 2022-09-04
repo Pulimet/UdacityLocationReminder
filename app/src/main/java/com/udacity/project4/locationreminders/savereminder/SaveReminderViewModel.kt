@@ -15,6 +15,7 @@ import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) : ViewModel() {
+
     lateinit var navViewModel: NavViewModel
 
     val reminderTitle = MutableLiveData<String?>()
