@@ -50,6 +50,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
             //get the reminder with the request id
             val result = remindersLocalRepository.getReminder(requestId)
             if (result is Result.Success<ReminderDTO>) {
+                logD("Got reminder from DB, title: ${result.data.title}")
                 val reminderDTO = result.data
                 //send a notification to the user with the reminder details
                 sendNotification(

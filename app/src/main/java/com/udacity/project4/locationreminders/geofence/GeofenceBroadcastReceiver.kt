@@ -11,6 +11,7 @@ import com.udacity.project4.utils.GeofenceUtils
 import com.udacity.project4.utils.GeofenceUtils.ACTION_GEOFENCE_EVENT
 import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.logE
+import com.udacity.project4.utils.logW
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
@@ -24,9 +25,15 @@ import com.udacity.project4.utils.logE
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        logD()
+        logD("intent.action: ${intent.action}")
         if (intent.action == ACTION_GEOFENCE_EVENT) {
-            GeofencingEvent.fromIntent(intent)?.also { onReceiveGeoEvent(it, context) }
+            logD("Action validated")
+            val geoFencingEvent = GeofencingEvent.fromIntent(intent)
+            if(geoFencingEvent == null) {
+                logW("geoFencingEvent is null")
+            } else {
+                onReceiveGeoEvent(geoFencingEvent, context)
+            }
         }
     }
 

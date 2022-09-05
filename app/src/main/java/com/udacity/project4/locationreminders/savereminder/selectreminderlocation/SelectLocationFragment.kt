@@ -47,18 +47,28 @@ class SelectLocationFragment : Fragment(),
     private var marker: Marker? = null
     private var circle: Circle? = null
 
-    @TargetApi(29)
-    private val activityResultLauncher =
+    private val requestForeground =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            logPermissions(permissions)
             val isFineLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)
             val isCoarseLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)
-            if (runningQOrLater) {
-                val isBGLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false)
-                handlePermissionsResult((isCoarseLocationGranted || isFineLocationGranted) && isBGLocationGranted)
-            } else {
-                handlePermissionsResult(isCoarseLocationGranted || isFineLocationGranted)
-            }
+            handleForegroundPermissionsResult(isCoarseLocationGranted || isFineLocationGranted)
         }
+
+    @TargetApi(29)
+    private val requestBackground =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            logPermissions(permissions)
+            val isBGLocationGranted = permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false)
+            handleBackgroundPermissionsResult(isBGLocationGranted || !runningQOrLater)
+        }
+
+    private fun logPermissions(permissions: Map<String, @JvmSuppressWildcards Boolean>) {
+        logD("permissions.size: ${permissions.size}")
+        permissions.forEach {
+            logD("${it.key} : ${it.value}")
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
         logD("ViewModel: $viewModel")
@@ -97,6 +107,7 @@ class SelectLocationFragment : Fragment(),
 
     // OnMapReadyCallback
     override fun onMapReady(maps: GoogleMap) {
+        logD()
         map = maps.apply {
             setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style))
             setOnPoiClickListener(this@SelectLocationFragment)
@@ -161,12 +172,12 @@ class SelectLocationFragment : Fragment(),
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnCompleteListener(requireActivity()) { task ->
-            if (task.isSuccessful) {
+            if (task.isSuccessful && task.result != null) {
                 map.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(
-                            task.result.latitude,
-                            task.result.longitude
+                            task.result?.latitude ?: 0.0,
+                            task.result?.longitude ?: 0.0
                         ), 15f
                     )
                 )
@@ -178,23 +189,24 @@ class SelectLocationFragment : Fragment(),
     private fun permissionCheckFlow() {
         logW("")
         when {
-            isLocationPermissionGranted() -> handlePermissionsResult(true)
+            isLocationPermissionGranted() -> handleForegroundPermissionsResult(true)
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
                 showDialogWithPermissionRationale()
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION) ->
+            runningQOrLater && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION) ->
                 showDialogWithPermissionRationale()
-            else -> requestPermission()
+            else -> requestForegroungdPermission()
         }
     }
 
     private fun showDialogWithPermissionRationale() {
+        logD()
         AlertDialog.Builder(requireActivity()).apply {
             setMessage(getString(R.string.location_permission_rationale))
             setNegativeButton(android.R.string.cancel) { dialog, _ ->
                 dialog.dismiss()
             }
             setPositiveButton(android.R.string.ok) { _, _ ->
-                requestPermission()
+                requestForegroungdPermission()
             }
             create().show()
         }
@@ -206,24 +218,41 @@ class SelectLocationFragment : Fragment(),
             requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(
+                && (ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        ) == PackageManager.PERMISSION_GRANTED || !runningQOrLater)
 
-    @TargetApi(29)
-    private fun requestPermission() {
-        var arrayOfPermissions = arrayOf(
+    private fun requestForegroungdPermission() {
+        logD()
+        val arrayOfPermissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
-        if (runningQOrLater) {
-            arrayOfPermissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        }
-        activityResultLauncher.launch(arrayOfPermissions)
+        requestForeground.launch(arrayOfPermissions)
     }
 
-    private fun handlePermissionsResult(granted: Boolean) {
+    @TargetApi(29)
+    private fun requestBackgroundPermission() {
+        logD()
+        requestBackground.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+    }
+
+    private fun handleForegroundPermissionsResult(granted: Boolean) {
+        logD("granted: $granted")
+        if (granted) {
+            if (runningQOrLater) {
+                requestBackgroundPermission()
+            } else {
+                enableMyLocation()
+            }
+        } else {
+            showDialogWithPermissionRationale()
+        }
+    }
+
+    private fun handleBackgroundPermissionsResult(granted: Boolean) {
+        logD("granted: $granted")
         if (granted) {
             enableMyLocation()
         } else {
