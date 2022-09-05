@@ -23,12 +23,14 @@ object GeofenceUtils {
     @SuppressLint("MissingPermission")
     fun addGeofencing(activity: Activity, reminderData: ReminderDTO) {
         logD("requestId: ${reminderData.id}")
+        logD("latitude: ${reminderData.latitude}")
+        logD("longitude: ${reminderData.longitude}")
         val geofencingRequest = createGeofencingRequest(reminderData)
         val geofencePendingIntent = getGeofencePendingIntent(activity)
         val geofencingClient = LocationServices.getGeofencingClient(activity)
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
-                logD("Add Geofence: ${geofencingRequest.geofences[0].requestId}")
+                logD("Success: Add Geofence: ${geofencingRequest.geofences[0].requestId}")
             }
             addOnFailureListener {
                 logW(it.message ?: "")
@@ -47,7 +49,8 @@ object GeofenceUtils {
     private fun getGeofencePendingIntent(activity: Activity): PendingIntent {
         val intent = Intent(activity, GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
-        return PendingIntent.getBroadcast(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val flag = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        return PendingIntent.getBroadcast(activity, 0, intent, flag)
     }
 
     private fun createGeofence(reminderData: ReminderDTO) = Geofence.Builder()
