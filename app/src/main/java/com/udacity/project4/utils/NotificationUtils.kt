@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
@@ -13,8 +14,9 @@ import com.udacity.project4.locationreminders.ReminderDescriptionActivity
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 
 private const val NOTIFICATION_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".channel"
+private const val NOTIFICATION_ID = 101
 
-fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
+fun createNotificationChannel(context: Context) {
     val notificationManager = context
         .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -22,14 +24,25 @@ fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
         && notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null
     ) {
-        val name = context.getString(R.string.app_name)
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            name,
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
+            context.getString(R.string.app_name),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            setShowBadge(false)
+            enableLights(true)
+            lightColor = Color.RED
+            enableVibration(true)
+            description = context.getString(R.string.notification_channel_description)
+        }
         notificationManager.createNotificationChannel(channel)
     }
+
+}
+
+fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
+    val notificationManager = context
+        .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     val intent = ReminderDescriptionActivity.newIntent(context.applicationContext, reminderDataItem)
 
@@ -49,6 +62,7 @@ fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
         .setAutoCancel(true)
         .build()
 
+    // TODO Permission for Android 13
     notificationManager.notify(getUniqueId(), notification)
 }
 

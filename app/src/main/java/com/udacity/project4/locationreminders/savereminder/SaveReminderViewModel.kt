@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
@@ -13,9 +14,9 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) : ViewModel() {
-
     lateinit var navViewModel: NavViewModel
 
     val reminderTitle = MutableLiveData<String?>()
@@ -25,6 +26,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
 
+    val addGeofencing: SingleLiveEvent<ReminderDTO> = SingleLiveEvent()
     val showErrorMessage: SingleLiveEvent<String> = SingleLiveEvent()
     val showSnackBar: SingleLiveEvent<String> = SingleLiveEvent()
     val showSnackBarInt: SingleLiveEvent<Int> = SingleLiveEvent()
@@ -67,12 +69,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     private fun validateAndSaveReminder(reminderData: ReminderDataItem) {
         if (validateEnteredData(reminderData)) {
             saveReminderToDb(reminderData)
-            addGeofencing(reminderData)
         }
-    }
-
-    private fun addGeofencing(reminderData: ReminderDataItem) {
-        // TODO Add a geofencing request
     }
 
     /**
@@ -80,17 +77,17 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
      */
     private fun saveReminderToDb(reminderData: ReminderDataItem) {
         showLoading.value = true
+        val reminderDTO = ReminderDTO(
+            reminderData.title,
+            reminderData.description,
+            reminderData.location,
+            reminderData.latitude,
+            reminderData.longitude,
+            reminderData.id
+        )
         viewModelScope.launch {
-            dataSource.saveReminder(
-                ReminderDTO(
-                    reminderData.title,
-                    reminderData.description,
-                    reminderData.location,
-                    reminderData.latitude,
-                    reminderData.longitude,
-                    reminderData.id
-                )
-            )
+            dataSource.saveReminder(reminderDTO)
+            addGeofencing.value = reminderDTO
             showLoading.value = false
             showToast.value = app.getString(R.string.reminder_saved)
             navViewModel.navigateUp()
@@ -103,6 +100,11 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     private fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
         if (reminderData.title.isNullOrEmpty()) {
             showSnackBarInt.value = R.string.err_enter_title
+            return false
+        }
+
+        if (reminderData.description.isNullOrEmpty()) {
+            showSnackBarInt.value = R.string.err_enter_description
             return false
         }
 
