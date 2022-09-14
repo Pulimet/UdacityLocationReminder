@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.extensions.covertDataFromDbToUIForm
 import com.udacity.project4.locationreminders.extensions.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
     private lateinit var remindersRepository: FakeDataSource
-    private lateinit var tasksViewModel: RemindersListViewModel
+    private lateinit var remindersViewModel: RemindersListViewModel
 
     private val rem1 = ReminderDTO("Title1", "Description1", "TA-1", 1.0, 1.0)
     private val rem2 = ReminderDTO("Title2", "Description2", "TA-2", 2.0, 2.0)
@@ -25,30 +26,18 @@ class RemindersListViewModelTest {
     fun setupViewModel() {
         remindersRepository = FakeDataSource()
         remindersRepository.addReminders(rem1, rem2, rem3)
-        tasksViewModel = RemindersListViewModel(remindersRepository)
+        remindersViewModel = RemindersListViewModel(remindersRepository)
     }
 
     @Test
-    fun loadReminders() {
+    fun loadReminders_updatesRemindersList() {
         // WHEN
-        tasksViewModel.loadReminders()
+        remindersViewModel.loadReminders()
         // THEN
-        val value = tasksViewModel.remindersList.getOrAwaitValue()
+        val value = remindersViewModel.remindersList.getOrAwaitValue()
         Assert.assertEquals(value[0], covertDataFromDbToUIForm(rem1))
         Assert.assertEquals(value[1], covertDataFromDbToUIForm(rem2))
         Assert.assertEquals(value[2], covertDataFromDbToUIForm(rem3))
     }
-
-    private fun covertDataFromDbToUIForm(reminder: ReminderDTO): ReminderDataItem {
-        return ReminderDataItem(
-            reminder.title,
-            reminder.description,
-            reminder.location,
-            reminder.latitude,
-            reminder.longitude,
-            reminder.id
-        )
-    }
-
 
 }

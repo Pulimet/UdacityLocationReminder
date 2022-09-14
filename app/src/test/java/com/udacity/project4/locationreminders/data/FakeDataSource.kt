@@ -20,7 +20,7 @@ class FakeDataSource : ReminderDataSource {
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
-        TODO("save the reminder")
+        observableRemindersTasks.value = Result.Success(listOf(reminder))
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {

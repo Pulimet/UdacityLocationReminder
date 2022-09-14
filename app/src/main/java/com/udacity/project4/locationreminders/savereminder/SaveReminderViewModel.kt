@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.Geofence
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
@@ -14,7 +13,6 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) : ViewModel() {
     lateinit var navViewModel: NavViewModel

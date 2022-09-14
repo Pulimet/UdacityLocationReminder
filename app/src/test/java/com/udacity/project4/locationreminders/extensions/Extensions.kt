@@ -3,6 +3,8 @@ package com.udacity.project4.locationreminders.extensions
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -37,4 +39,15 @@ fun <T> LiveData<T>.getOrAwaitValue(
 
     @Suppress("UNCHECKED_CAST")
     return data as T
+}
+
+fun covertDataFromDbToUIForm(reminder: ReminderDTO): ReminderDataItem {
+    return ReminderDataItem(
+        reminder.title,
+        reminder.description,
+        reminder.location,
+        reminder.latitude,
+        reminder.longitude,
+        reminder.id
+    )
 }
