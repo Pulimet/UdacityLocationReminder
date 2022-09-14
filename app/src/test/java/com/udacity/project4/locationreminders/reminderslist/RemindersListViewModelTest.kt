@@ -30,7 +30,7 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_updatesRemindersList_Success() {
+    fun loadReminders_onSuccess_updatesReminderList() {
         // WHEN
         remindersViewModel.loadReminders()
         // THEN
@@ -41,7 +41,17 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_updatesRemindersList_Error() {
+    fun loadReminders_onRequest_showsLoading() {
+        // WHEN
+        remindersViewModel.loadReminders()
+        // THEN
+        val value = remindersViewModel.showLoading.getOrAwaitValue()
+        Assert.assertEquals(value, true)
+    }
+
+
+    @Test
+    fun loadReminders_onError_showsSnackBar() {
         // WHEN
         remindersRepository.setReturnError(true)
         remindersViewModel.loadReminders()
