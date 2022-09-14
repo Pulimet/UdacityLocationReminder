@@ -106,7 +106,7 @@ class ReminderListFragment : Fragment(), MenuProvider {
         AuthUI.getInstance()
             .signOut(requireContext())
             .addOnCompleteListener {
-                findNavController().navigate(ReminderListFragmentDirections.actionReminderListFragmentToLoginFragment())
+                viewModel.onLogoutComplete()
             }
     }
 }

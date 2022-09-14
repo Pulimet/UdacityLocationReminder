@@ -72,4 +72,8 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
     private fun invalidateShowNoData() {
         showNoData.value = remindersList.value == null || remindersList.value!!.isEmpty()
     }
+
+    fun onLogoutComplete() {
+        navViewModel.navigateTo(ReminderListFragmentDirections.actionReminderListFragmentToLoginFragment())
+    }
 }
