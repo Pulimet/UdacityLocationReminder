@@ -37,27 +37,32 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
             val result = dataSource.getReminders()
             showLoading.postValue(false)
             when (result) {
-                is Result.Success<*> -> {
-                    val dataList = ArrayList<ReminderDataItem>()
-                    dataList.addAll((result.data as List<ReminderDTO>).map { reminder ->
-                        //map the reminder data from the DB to the be ready to be displayed on the UI
-                        ReminderDataItem(
-                            reminder.title,
-                            reminder.description,
-                            reminder.location,
-                            reminder.latitude,
-                            reminder.longitude,
-                            reminder.id
-                        )
-                    })
-                    remindersList.value = dataList
-                }
-                is Result.Error ->
-                    showSnackBar.value = result.message ?: ""
+                is Result.Success<*> -> onResultSuccess(result)
+                is Result.Error -> showSnackBar.value = result.message ?: ""
             }
 
             //check if no data has to be shown
             invalidateShowNoData()
+        }
+    }
+
+    private fun onResultSuccess(result: Result.Success<*>) {
+        val reminderDataItemList = covertDataFromDbToUIForm(result)
+        remindersList.value = ArrayList<ReminderDataItem>().apply { addAll(reminderDataItemList) }
+    }
+
+    private fun covertDataFromDbToUIForm(result: Result.Success<*>): List<ReminderDataItem> {
+        val reminderDTOList = result.data as List<ReminderDTO>
+        return reminderDTOList.map { reminder ->
+            //map the reminder data from the DB to the be ready to be displayed on the UI
+            ReminderDataItem(
+                reminder.title,
+                reminder.description,
+                reminder.location,
+                reminder.latitude,
+                reminder.longitude,
+                reminder.id
+            )
         }
     }
 
