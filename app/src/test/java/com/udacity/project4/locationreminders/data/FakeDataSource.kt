@@ -9,15 +9,24 @@ import kotlinx.coroutines.runBlocking
 class FakeDataSource : ReminderDataSource {
     private val observableRemindersTasks = MutableLiveData<Result<List<ReminderDTO>>>()
 
+    private var shouldReturnError = false
+
+    fun setReturnError(value: Boolean) {
+        shouldReturnError = value
+    }
+
     fun addReminders(vararg reminders: ReminderDTO) {
         runBlocking {
             observableRemindersTasks.value = Result.Success(reminders.asList())
         }
     }
 
-    override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        return observableRemindersTasks.value!!
+    override suspend fun getReminders() = if (shouldReturnError) {
+        Result.Error("Error", 404)
+    } else {
+        observableRemindersTasks.value!!
     }
+
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
         observableRemindersTasks.value = Result.Success(listOf(reminder))

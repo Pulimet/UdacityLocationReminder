@@ -30,7 +30,7 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_updatesRemindersList() {
+    fun loadReminders_updatesRemindersList_Success() {
         // WHEN
         remindersViewModel.loadReminders()
         // THEN
@@ -38,6 +38,16 @@ class RemindersListViewModelTest {
         Assert.assertEquals(value[0], covertDataFromDbToUIForm(rem1))
         Assert.assertEquals(value[1], covertDataFromDbToUIForm(rem2))
         Assert.assertEquals(value[2], covertDataFromDbToUIForm(rem3))
+    }
+
+    @Test
+    fun loadReminders_updatesRemindersList_Error() {
+        // WHEN
+        remindersRepository.setReturnError(true)
+        remindersViewModel.loadReminders()
+        // THEN
+        val value = remindersViewModel.showSnackBar.getOrAwaitValue()
+        Assert.assertEquals(value, "Error")
     }
 
 }

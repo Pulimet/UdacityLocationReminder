@@ -18,7 +18,14 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 object Koin {
+
+    private var isInitialized = false
+
+    @Synchronized
     fun init(applicationContext: Context) {
+        if (isInitialized) return
+        isInitialized = true
+
         startKoin {
             androidContext(applicationContext)
             modules(listOf(mainModule))
