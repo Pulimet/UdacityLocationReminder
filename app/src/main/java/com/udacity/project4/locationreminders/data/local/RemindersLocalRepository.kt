@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.data.local
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
+import com.udacity.project4.utils.logD
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,7 +27,9 @@ class RemindersLocalRepository(
      */
     override suspend fun getReminders(): Result<List<ReminderDTO>> = withContext(ioDispatcher) {
         return@withContext try {
-            Result.Success(remindersDao.getReminders())
+            Result.Success(remindersDao.getReminders().also {
+                logD("getReminders(), size: ${it.size} ")
+            })
         } catch (ex: Exception) {
             Result.Error(ex.localizedMessage)
         }

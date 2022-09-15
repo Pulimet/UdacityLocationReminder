@@ -8,12 +8,12 @@ import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentRemindersBinding
 import com.udacity.project4.navigation.NavViewModel
+import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
@@ -37,6 +37,7 @@ class ReminderListFragment : Fragment(), MenuProvider {
 
     private fun setupBinding(inflater: LayoutInflater, container: ViewGroup?) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_reminders, container, false)
+        logD("RemindersListViewModel: $viewModel")
         binding.viewModel = viewModel
     }
 
@@ -55,6 +56,7 @@ class ReminderListFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
+        logD()
         viewModel.showErrorMessage.observe(viewLifecycleOwner) {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         }
@@ -66,6 +68,9 @@ class ReminderListFragment : Fragment(), MenuProvider {
         }
         viewModel.showSnackBarInt.observe(viewLifecycleOwner) {
             Snackbar.make(requireView(), getString(it), Snackbar.LENGTH_LONG).show()
+        }
+        viewModel.showLoading.observe(viewLifecycleOwner) {
+            if (!it) binding.refreshLayout.isRefreshing = false
         }
     }
 

@@ -8,6 +8,7 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.SingleLiveEvent
+import com.udacity.project4.utils.logD
 import kotlinx.coroutines.launch
 
 class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewModel() {
@@ -31,8 +32,9 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
      * or show error if any
      */
     fun loadReminders() {
-        showLoading.value = true
+        logD()
         viewModelScope.launch {
+            showLoading.value = true
             //interacting with the dataSource has to be through a coroutine
             val result = dataSource.getReminders()
             showLoading.postValue(false)
@@ -48,6 +50,7 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
 
     private fun onResultSuccess(result: Result.Success<*>) {
         val reminderDataItemList = covertDataFromDbToUIForm(result)
+        logD("Updates remindersList, size: ${reminderDataItemList.size}")
         remindersList.value = ArrayList<ReminderDataItem>().apply { addAll(reminderDataItemList) }
     }
 
