@@ -24,6 +24,7 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
     val showNoData: MutableLiveData<Boolean> = MutableLiveData()
 
     fun onAddReminderFabClick() {
+        logD()
         navViewModel.navigateTo(ReminderListFragmentDirections.toSaveReminder())
     }
 
@@ -32,7 +33,6 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
      * or show error if any
      */
     fun loadReminders() {
-        logD()
         viewModelScope.launch {
             showLoading.value = true
             //interacting with the dataSource has to be through a coroutine
@@ -50,10 +50,10 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
 
     private fun onResultSuccess(result: Result.Success<*>) {
         val reminderDataItemList = covertDataFromDbToUIForm(result)
-        logD("Updates remindersList, size: ${reminderDataItemList.size}")
         remindersList.value = ArrayList<ReminderDataItem>().apply { addAll(reminderDataItemList) }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun covertDataFromDbToUIForm(result: Result.Success<*>): List<ReminderDataItem> {
         val reminderDTOList = result.data as List<ReminderDTO>
         return reminderDTOList.map { reminder ->

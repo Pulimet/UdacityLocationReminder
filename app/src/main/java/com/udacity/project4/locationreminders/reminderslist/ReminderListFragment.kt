@@ -13,7 +13,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentRemindersBinding
 import com.udacity.project4.navigation.NavViewModel
-import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
@@ -37,7 +36,6 @@ class ReminderListFragment : Fragment(), MenuProvider {
 
     private fun setupBinding(inflater: LayoutInflater, container: ViewGroup?) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_reminders, container, false)
-        logD("RemindersListViewModel: $viewModel")
         binding.viewModel = viewModel
     }
 
@@ -56,7 +54,6 @@ class ReminderListFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        logD()
         viewModel.showErrorMessage.observe(viewLifecycleOwner) {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         }
