@@ -2,14 +2,15 @@ package com.udacity.project4
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -25,10 +26,8 @@ import com.udacity.project4.navigation.NavObserver
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.util.*
 import com.udacity.project4.utils.GetResource
-import com.udacity.project4.utils.logD
 import com.udacity.project4.utils.test.EspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.not
@@ -95,7 +94,7 @@ class RemindersActivityTest : AutoCloseKoinTest() {
             singleOf(::RemindersListViewModel)
             viewModelOf(::NavViewModel)
             viewModelOf(::LoginViewModel)
-            viewModelOf(::SaveReminderViewModel)
+            single { SaveReminderViewModel(appContext, get()) }
             single<ReminderDataSource> { RemindersLocalRepository(get()) }
             single { LocalDB.createRemindersDao(appContext) }
         }
@@ -115,11 +114,11 @@ class RemindersActivityTest : AutoCloseKoinTest() {
 
     @Test
     fun ifRepoEmptyNoDataShown() = runBlockingAndActivityScenarioControl {
-        Espresso.onView(withId(R.id.noDataTextView)).check(matches(withText(R.string.no_data)))
+        onView(withId(R.id.noDataTextView)).check(matches(withText(R.string.no_data)))
     }
 
     @Test
-    fun whenReminderAddedItShown() = runBlockingAndActivityScenarioControl {
+    fun whenReminderAddedToRepoItShown() = runBlockingAndActivityScenarioControl {
         val viewModel = get<RemindersListViewModel>()
         // WHEN
         repository.saveReminder(reminderData)
@@ -131,19 +130,20 @@ class RemindersActivityTest : AutoCloseKoinTest() {
     }
 
     @Test
-    fun x3() = runBlockingAndActivityScenarioControl {}
+    fun whenReminderAddedItShownInTheList() = runBlockingAndActivityScenarioControl {
+        onView(withId(R.id.addReminderFAB)).waitUntilVisible().perform(click())
+        onView(withId(R.id.selectLocation)).waitUntilVisible().perform(click())
+        onView(withId(R.id.map)).waitUntilVisible().perform(clickXY(200, 200))
+        onView(withId(R.id.saveLocation)).perform(clickXY(0, 0))
+        onView(withId(R.id.reminderTitle)).perform(replaceText(reminderData.title))
+        onView(withId(R.id.reminderDescription)).perform(replaceText(reminderData.description))
+        onView(withId(R.id.saveReminder)).perform(clickXY(0, 0))
+        onView(withId(R.id.reminderssRecyclerView))
+            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
+            .check(matches(hasDescendant(withText(reminderData.title))))
+            .check(matches(hasDescendant(withText(reminderData.description))))
+    }
 
-    @Test
-    fun x4() = runBlockingAndActivityScenarioControl {}
-
-    @Test
-    fun x5() = runBlockingAndActivityScenarioControl {}
-
-    @Test
-    fun x6() = runBlockingAndActivityScenarioControl {}
-
-    @Test
-    fun x7() = runBlockingAndActivityScenarioControl {}
 
     private fun runBlockingAndActivityScenarioControl(function: suspend () -> Unit) = runTest {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)

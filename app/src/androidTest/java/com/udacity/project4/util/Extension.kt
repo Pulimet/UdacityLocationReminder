@@ -6,6 +6,9 @@ import androidx.lifecycle.Observer
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.ViewInteraction
+import androidx.test.espresso.action.GeneralClickAction
+import androidx.test.espresso.action.Press
+import androidx.test.espresso.action.Tap
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -44,7 +47,7 @@ fun <T> LiveData<T>.getOrAwaitValue(
 /**
  * Wait for view to be visible
  */
-fun ViewInteraction.waitUntilVisible(timeout: Long): ViewInteraction {
+fun ViewInteraction.waitUntilVisible(timeout: Long = 1000): ViewInteraction {
     val startTime = System.currentTimeMillis()
     val endTime = startTime + timeout
 
@@ -75,4 +78,20 @@ fun waitFor(delay: Long): ViewAction {
             uiController.loopMainThreadForAtLeast(delay)
         }
     }
+}
+
+fun clickXY(x: Int, y: Int): ViewAction {
+    return GeneralClickAction(
+        Tap.SINGLE,
+        { view ->
+            val screenPos = IntArray(2)
+            view.getLocationOnScreen(screenPos)
+            val screenX = (screenPos[0] + x).toFloat()
+            val screenY = (screenPos[1] + y).toFloat()
+            floatArrayOf(screenX, screenY)
+        },
+        Press.FINGER,
+        0,
+        0
+    )
 }
