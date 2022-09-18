@@ -13,13 +13,11 @@ import com.google.android.gms.location.LocationServices
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
-import java.util.concurrent.TimeUnit
 
 object GeofenceUtils {
 
     const val ACTION_GEOFENCE_EVENT = "LocationReminder.action.ACTION_GEOFENCE_EVENT"
     private const val GEOFENCE_RADIUS_IN_METERS = 100f
-    private val GEOFENCE_EXPIRATION_IN_MILLISECONDS = TimeUnit.DAYS.toMillis(365)
 
     @SuppressLint("MissingPermission")
     fun addGeofencing(activity: Activity, reminderData: ReminderDTO) {
@@ -67,9 +65,6 @@ object GeofenceUtils {
             reminderData.longitude ?: 0.0,
             GEOFENCE_RADIUS_IN_METERS
         )
-        // Set the expiration duration of the geofence. This geofence gets
-        // automatically removed after this period of time.
-        .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
         // Set the transition types of interest. Alerts are only generated for these
         // transition. We track entry and exit transitions in this sample.
         .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
