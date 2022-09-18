@@ -13,15 +13,15 @@ object PermissionUtils {
 
     fun foregroundPermissionCheckFlow(
         activity: Activity,
-        requestForeground: ActivityResultLauncher<Array<String>>,
+        requestPermissions: ActivityResultLauncher<Array<String>>,
         permissionGranted: () -> Unit
     ) {
         logW("")
         when {
             isForegroundLocationPermissionGranted(activity) -> permissionGranted()
             activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
-                showDialogWithPermissionRationale(activity, requestForeground)
-            else -> requestForegroundPermission(requestForeground)
+                showDialogWithPermissionRationale(activity, requestPermissions)
+            else -> requestForegroundPermission(requestPermissions)
         }
     }
 
@@ -31,7 +31,7 @@ object PermissionUtils {
         ) == PackageManager.PERMISSION_GRANTED
 
 
-    private fun showDialogWithPermissionRationale(activity: Activity, requestForeground: ActivityResultLauncher<Array<String>>) {
+    private fun showDialogWithPermissionRationale(activity: Activity, requestPermissions: ActivityResultLauncher<Array<String>>) {
         logD()
         AlertDialog.Builder(activity).apply {
             setMessage(activity.getString(R.string.location_permission_rationale))
@@ -39,15 +39,15 @@ object PermissionUtils {
                 dialog.dismiss()
             }
             setPositiveButton(android.R.string.ok) { _, _ ->
-                requestForegroundPermission(requestForeground)
+                requestForegroundPermission(requestPermissions)
             }
             create().show()
         }
     }
 
-    private fun requestForegroundPermission(requestForeground: ActivityResultLauncher<Array<String>>) {
+    private fun requestForegroundPermission(requestPermissions: ActivityResultLauncher<Array<String>>) {
         logD("-")
-        requestForeground.launch(
+        requestPermissions.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION

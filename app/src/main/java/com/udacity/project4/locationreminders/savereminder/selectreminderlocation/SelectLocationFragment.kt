@@ -2,6 +2,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,10 +23,7 @@ import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.navigation.NavViewModel
-import com.udacity.project4.utils.logD
-import com.udacity.project4.utils.logW
-import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import com.udacity.project4.utils.PermissionUtils
+import com.udacity.project4.utils.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 
@@ -42,10 +40,21 @@ class SelectLocationFragment : Fragment(),
     private var marker: Marker? = null
     private var circle: Circle? = null
 
-    private val requestForeground =
+    private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             PermissionUtils.printLog(permissions)
-            enableMyLocation()
+            checkPermissionsAndEnableMyLocation()
+        }
+
+    private val requestLocationSettingsOn =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { activityResult ->
+            if (activityResult.resultCode == RESULT_OK) {
+                logD("Location on")
+                enableMapMyLocation()
+            } else {
+                logD("Location off")
+                checkDeviceLocation(false)
+            }
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
@@ -91,7 +100,7 @@ class SelectLocationFragment : Fragment(),
             setOnPoiClickListener(this@SelectLocationFragment)
             setOnMapClickListener(this@SelectLocationFragment)
         }
-        enableMyLocation()
+        checkPermissionsAndEnableMyLocation()
     }
 
     // GoogleMap.OnPoiClickListener
@@ -134,19 +143,35 @@ class SelectLocationFragment : Fragment(),
 
     // Location
     @SuppressLint("MissingPermission")
-    private fun enableMyLocation() {
-        if (PermissionUtils.isForegroundLocationPermissionGranted(requireContext())) {
-            logD("Location permissions granted")
-            map.isMyLocationEnabled = true
-            moveCameraToCurrentLocation()
-        } else {
+    private fun checkPermissionsAndEnableMyLocation() {
+        if (!PermissionUtils.isForegroundLocationPermissionGranted(requireContext())) {
             logW("Location permissions not granted")
             PermissionUtils.foregroundPermissionCheckFlow(
                 requireActivity(),
-                requestForeground,
-                permissionGranted = { moveCameraToCurrentLocation() }
+                requestPermissions,
+                permissionGranted = { checkPermissionsAndEnableMyLocation() }
             )
+            return
         }
+        logD("Location permissions granted")
+        checkDeviceLocation()
+    }
+
+    private fun checkDeviceLocation(resolve: Boolean = true) {
+        logD()
+        LocationUtils.checkDeviceLocationSettings(
+            requireActivity(),
+            requestLocationSettingsOn,
+            onLocationEnabled = { enableMapMyLocation() },
+            resolve
+        )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun enableMapMyLocation() {
+        logD()
+        map.isMyLocationEnabled = true
+        moveCameraToCurrentLocation()
     }
 
     @SuppressLint("MissingPermission")

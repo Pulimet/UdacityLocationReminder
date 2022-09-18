@@ -26,7 +26,7 @@ object Logger {
 
     private const val classNameLength = 25
     private const val packageAndClassNameLength = 30
-    private const val methodNameLength = 20
+    private const val methodNameLength = 30
     private const val threadNameLength = 6
     private const val timeFormat = "HH:mm:ss.SSS"
 
