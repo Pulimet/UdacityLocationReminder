@@ -59,5 +59,4 @@ class RemindersListViewModelTest {
         val value = remindersViewModel.showSnackBar.getOrAwaitValue()
         Assert.assertEquals(value, "Error")
     }
-
 }

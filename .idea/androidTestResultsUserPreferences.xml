@@ -159,6 +159,34 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="110941273">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RF8M90S15PM-Q7MOAS._adb-tls-connect._tcp." value="120" />
+                  <entry key="samsung&#10; SM-N975F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="358718836">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RF8M90S15PM-Q7MOAS._adb-tls-connect._tcp." value="120" />
+                  <entry key="samsung&#10; SM-N975F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="1336877322">
           <value>
             <AndroidTestResultsTableState>
@@ -202,6 +230,20 @@
           </value>
         </entry>
         <entry key="1608043865">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RF8M90S15PM-Q7MOAS._adb-tls-connect._tcp." value="120" />
+                  <entry key="samsung&#10; SM-N975F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="1960108270">
           <value>
             <AndroidTestResultsTableState>
               <option name="preferredColumnWidths">

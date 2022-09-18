@@ -33,11 +33,22 @@ class FakeDataSource : ReminderDataSource {
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        TODO("return the reminder with the id")
+        if (shouldReturnError) {
+            return Result.Error("No result")
+        }
+        if (observableRemindersTasks.value is Result.Success) {
+            val list = (observableRemindersTasks.value as Result.Success).data
+            list.forEach {
+                if (it.id == id) {
+                    return Result.Success(it)
+                }
+            }
+        }
+        return Result.Error("No result")
     }
 
     override suspend fun deleteAllReminders() {
-        TODO("delete all the reminders")
+        observableRemindersTasks.value = Result.Success(emptyList())
     }
 
 

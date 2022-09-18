@@ -11,6 +11,10 @@ class FakeDataSource : ReminderDataSource {
 
     private var shouldReturnError = false
 
+    fun setReturnError(value: Boolean) {
+        shouldReturnError = value
+    }
+
     override suspend fun getReminders() = if (shouldReturnError) {
         Result.Error("Error", 404)
     } else {
@@ -23,11 +27,21 @@ class FakeDataSource : ReminderDataSource {
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        return Result.Success(ReminderDTO("1", "2", "3", 0.0, 0.0))
+        if (shouldReturnError) {
+            return Result.Error("No result")
+        }
+        if (observableRemindersTasks.value is Result.Success) {
+            val list = (observableRemindersTasks.value as Result.Success).data
+            list.forEach {
+                if (it.id == id) {
+                    return Result.Success(it)
+                }
+            }
+        }
+        return Result.Error("No result")
     }
 
     override suspend fun deleteAllReminders() {
+        observableRemindersTasks.value = Result.Success(emptyList())
     }
-
-
 }
