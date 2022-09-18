@@ -6,6 +6,8 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.extensions.covertDataFromDbToUIForm
 import com.udacity.project4.locationreminders.extensions.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -14,6 +16,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
+
     private lateinit var remindersRepository: FakeDataSource
     private lateinit var remindersViewModel: RemindersListViewModel
 
@@ -41,13 +44,25 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_onRequest_showsLoading() {
+    fun loadReminders_onRequest_showsLoading_collected() = runTest {
+        val loadingStatesList = mutableListOf<Boolean>()
+        val collectJob = launch(UnconfinedTestDispatcher()) {
+            remindersViewModel.showLoading.observeForever {
+                loadingStatesList.add(it)
+            }
+        }
         // WHEN
+        remindersRepository.setReturnError(true)
         remindersViewModel.loadReminders()
+
         // THEN
-        val value = remindersViewModel.showLoading.getOrAwaitValue()
-        Assert.assertEquals(value, true)
+        Assert.assertEquals(2, loadingStatesList.size)
+        Assert.assertEquals(true, loadingStatesList[0])
+        Assert.assertEquals(false, loadingStatesList[1])
+
+        collectJob.cancel()
     }
+
 
 
     @Test

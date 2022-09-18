@@ -37,7 +37,7 @@ class RemindersListViewModel(private val dataSource: ReminderDataSource) : ViewM
             showLoading.value = true
             //interacting with the dataSource has to be through a coroutine
             val result = dataSource.getReminders()
-            showLoading.postValue(false)
+            showLoading.value = false
             when (result) {
                 is Result.Success<*> -> onResultSuccess(result)
                 is Result.Error -> showSnackBar.value = result.message ?: ""
