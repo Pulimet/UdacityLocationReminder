@@ -1,9 +1,9 @@
 package com.udacity.project4
 
 import android.app.Application
+import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
@@ -12,6 +12,7 @@ import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -45,11 +46,15 @@ import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
 
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 //END TO END test to black box test the app
 class RemindersActivityTest : AutoCloseKoinTest() {
+
+    @get:Rule
+    var activityScenarioRule = activityScenarioRule<RemindersActivity>()
 
     @Rule
     @JvmField
@@ -58,6 +63,8 @@ class RemindersActivityTest : AutoCloseKoinTest() {
     private lateinit var repository: ReminderDataSource
     private val dataBindingIdlingResource = DataBindingIdlingResource()
     private lateinit var appContext: Application
+    private lateinit var activity: RemindersActivity
+    private lateinit var decorView: View
 
     private val reminderData = ReminderDTO("Title3", "Description3", "TA-3", 3.0, 3.0)
 
@@ -69,6 +76,7 @@ class RemindersActivityTest : AutoCloseKoinTest() {
     fun registerIdlingResource() {
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+        dataBindingIdlingResource.monitorActivity(activityScenarioRule.scenario)
     }
 
     /**
@@ -110,15 +118,20 @@ class RemindersActivityTest : AutoCloseKoinTest() {
         runBlocking {
             repository.deleteAllReminders()
         }
+
+        activityScenarioRule.scenario.onActivity {
+            activity = it
+            decorView = activity.window.decorView
+        }
     }
 
     @Test
-    fun ifRepoEmptyNoDataShown() = runBlockingAndActivityScenarioControl {
+    fun ifRepoEmptyNoDataShown() = runTest {
         onView(withId(R.id.noDataTextView)).check(matches(withText(R.string.no_data)))
     }
 
     @Test
-    fun whenReminderAddedToRepoItShown() = runBlockingAndActivityScenarioControl {
+    fun whenReminderAddedToRepoItShown() = runTest {
         val viewModel = get<RemindersListViewModel>()
         // WHEN
         repository.saveReminder(reminderData)
@@ -130,7 +143,40 @@ class RemindersActivityTest : AutoCloseKoinTest() {
     }
 
     @Test
-    fun whenReminderAddedItShownInTheList() = runBlockingAndActivityScenarioControl {
+    fun whenReminderAddedItShownInTheList() = runTest {
+        // WHEN
+        addReminderFlow()
+        // THEN
+        onView(withId(R.id.reminderssRecyclerView))
+            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
+            .check(matches(hasDescendant(withText(reminderData.title))))
+            .check(matches(hasDescendant(withText(reminderData.description))))
+    }
+
+    // TODO Dear reviewr the test bellow commented out because Toasts couldn't be tested on API 30+
+    // Source: https://github.com/android/android-test/issues/803
+/*    @Test
+    fun whenReminderAddedToastIsShown() = runTest {
+        // WHEN
+        addReminderFlow()
+        // THEN
+        onView(withText(R.string.reminder_saved))
+            .inRoot(ToastMatcher())
+            .check(matches(isDisplayed()))
+    }*/
+
+    @Test
+    fun whenSelectLocationOpenedSnackBarShown() = runTest {
+        // WHEN
+        onView(withId(R.id.addReminderFAB)).waitUntilVisible().perform(click())
+        onView(withId(R.id.selectLocation)).waitUntilVisible().perform(click())
+        // THEN
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.select_poi_please)))
+    }
+
+    // Shared
+    private fun addReminderFlow() {
         onView(withId(R.id.addReminderFAB)).waitUntilVisible().perform(click())
         onView(withId(R.id.selectLocation)).waitUntilVisible().perform(click())
         onView(withId(R.id.map)).waitUntilVisible().perform(clickXY(200, 200))
@@ -138,19 +184,5 @@ class RemindersActivityTest : AutoCloseKoinTest() {
         onView(withId(R.id.reminderTitle)).perform(replaceText(reminderData.title))
         onView(withId(R.id.reminderDescription)).perform(replaceText(reminderData.description))
         onView(withId(R.id.saveReminder)).perform(clickXY(0, 0))
-        onView(withId(R.id.reminderssRecyclerView))
-            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
-            .check(matches(hasDescendant(withText(reminderData.title))))
-            .check(matches(hasDescendant(withText(reminderData.description))))
     }
-
-
-    private fun runBlockingAndActivityScenarioControl(function: suspend () -> Unit) = runTest {
-        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
-        dataBindingIdlingResource.monitorActivity(activityScenario) // LOOK HERE
-        function()
-        activityScenario.close()
-    }
-
-
 }
