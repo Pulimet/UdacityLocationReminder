@@ -142,14 +142,13 @@ class SelectLocationFragment : Fragment(),
     }
 
     // Location
-    @SuppressLint("MissingPermission")
     private fun checkPermissionsAndEnableMyLocation() {
         if (!PermissionUtils.isForegroundLocationPermissionGranted(requireContext())) {
             logW("Location permissions not granted")
-            PermissionUtils.foregroundPermissionCheckFlow(
+            PermissionUtils.foregroundLocationPermissionCheckFlow(
                 requireActivity(),
                 requestPermissions,
-                permissionGranted = { checkPermissionsAndEnableMyLocation() }
+                permissionGranted = { checkDeviceLocation() }
             )
             return
         }

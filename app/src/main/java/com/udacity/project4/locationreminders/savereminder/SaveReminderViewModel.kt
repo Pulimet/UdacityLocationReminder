@@ -12,6 +12,7 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.navigation.NavViewModel
 import com.udacity.project4.utils.SingleLiveEvent
+import com.udacity.project4.utils.logD
 import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) : ViewModel() {
@@ -50,6 +51,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     }
 
     fun onSaveReminderClick() {
+        logD()
         validateAndSaveReminder(
             ReminderDataItem(
                 reminderTitle.value,

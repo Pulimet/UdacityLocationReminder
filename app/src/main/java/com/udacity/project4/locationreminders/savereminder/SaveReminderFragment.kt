@@ -1,19 +1,19 @@
 package com.udacity.project4.locationreminders.savereminder
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.navigation.NavViewModel
-import com.udacity.project4.utils.GeofenceUtils
-import com.udacity.project4.utils.logD
-import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import com.udacity.project4.utils.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class SaveReminderFragment : Fragment() {
@@ -22,6 +22,23 @@ class SaveReminderFragment : Fragment() {
     private val viewModel by sharedViewModel<SaveReminderViewModel>()
     private val navViewModel by sharedViewModel<NavViewModel>()
     private lateinit var binding: FragmentSaveReminderBinding
+
+    private val requestPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            PermissionUtils.printLog(permissions)
+            checkPermissionsAndInvokeSaveReminderClick()
+        }
+
+    private val requestLocationSettingsOn =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { activityResult ->
+            if (activityResult.resultCode == Activity.RESULT_OK) {
+                logD("Location on")
+                viewModel.onSaveReminderClick()
+            } else {
+                logD("Location off")
+                checkDeviceLocation(false)
+            }
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, b: Bundle?): View {
         logD("ViewModel: $viewModel")
@@ -39,11 +56,34 @@ class SaveReminderFragment : Fragment() {
         binding.selectLocation.setOnClickListener {
             viewModel.onSelectLocationClick()
         }
-        binding.saveReminder.setOnClickListener {
-            viewModel.onSaveReminderClick()
-        }
+        binding.saveReminder.setOnClickListener { checkPermissionsAndInvokeSaveReminderClick() }
 
         observeViewModel()
+    }
+
+    // Location
+    private fun checkPermissionsAndInvokeSaveReminderClick() {
+        if (!PermissionUtils.isBackgroundPermissionGranted(requireContext())) {
+            logW("Location permissions not granted")
+            PermissionUtils.locationPermissionCheckFlow(
+                requireActivity(),
+                requestPermissions,
+                permissionGranted = { checkDeviceLocation() }
+            )
+            return
+        }
+        logD("Location permissions granted")
+        checkDeviceLocation()
+    }
+
+    private fun checkDeviceLocation(resolve: Boolean = true) {
+        logD()
+        LocationUtils.checkDeviceLocationSettings(
+            requireActivity(),
+            requestLocationSettingsOn,
+            onLocationEnabled = { viewModel.onSaveReminderClick() },
+            resolve
+        )
     }
 
     private fun observeViewModel() {
