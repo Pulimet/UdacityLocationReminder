@@ -43,15 +43,21 @@ class RemindersLocalRepositoryTest {
     fun closeDb() = database.close()
 
     @Test
-    fun saveAndGetReminder() = runTest {
+    fun saveAndGetReminderSuccess() = runTest {
         remindersLocalRepository.saveReminder(rem1)
-        val reminder = remindersLocalRepository.getReminder(rem1.id)
+        val result = remindersLocalRepository.getReminder(rem1.id)
 
-        Assert.assertEquals(Result.Success(rem1), reminder)
+        Assert.assertEquals(Result.Success(rem1), result)
     }
 
     @Test
-    fun getReminders() = runTest {
+    fun getNotExistingReminderFails() = runTest {
+        val result = remindersLocalRepository.getReminder(rem1.id)
+        Assert.assertEquals(Result.Error("Reminder not found!"), result)
+    }
+
+    @Test
+    fun getRemindersSuccess() = runTest {
         remindersLocalRepository.saveReminder(rem1)
         remindersLocalRepository.saveReminder(rem2)
         remindersLocalRepository.saveReminder(rem3)

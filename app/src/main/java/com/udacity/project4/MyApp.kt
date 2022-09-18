@@ -11,7 +11,6 @@ class MyApp : Application() {
     // TODO: Coroutine is not properly tested using the check_loading testing function.
     // TODO: Error handling is not properly done in the FakeDataSource class.
     // TODO: No Espresso tests for Snackbar and Toast messages.
-    // TODO: Predictable errors like data not found are not tested.
     // TODO: Idling resources are not properly used.
 
     override fun onCreate() {
