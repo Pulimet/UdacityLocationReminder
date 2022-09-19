@@ -14,7 +14,7 @@ class ToastMatcher : TypeSafeMatcher<Root>() {
     override fun matchesSafely(root: Root): Boolean {
         logD("====")
         val type: Int = root.windowLayoutParams.get().type
-        if (type == WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY) {
+        if (type == WindowManager.LayoutParams.TYPE_TOAST) {
             val windowToken: IBinder = root.decorView.windowToken
             val appToken: IBinder = root.decorView.applicationWindowToken
             if (windowToken === appToken) {

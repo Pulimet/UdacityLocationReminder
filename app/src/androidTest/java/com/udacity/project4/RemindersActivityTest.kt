@@ -129,17 +129,17 @@ class RemindersActivityTest : AutoCloseKoinTest() {
         onView(withId(R.id.noDataTextView)).check(matches(not(isCompletelyDisplayed())))
     }
 
-    // TODO Dear reviewr the test bellow commented out because Toasts couldn't be tested on API 30+
+    // Dear reviewer, please note, the test bellow will not work on API 30+ only
     // Source: https://github.com/android/android-test/issues/803
-/*    @Test
-    fun whenReminderAddedToastIsShown() = runTest {
+    @Test
+    fun whenReminderAddedToastIsShown() = runBlockingAndActivityScenarioControl {
         // WHEN
         addReminderFlow()
         // THEN
         onView(withText(R.string.reminder_saved))
             .inRoot(ToastMatcher())
             .check(matches(isDisplayed()))
-    }*/
+    }
 
     @Test
     fun whenSelectLocationOpenedSnackBarShown() = runBlockingAndActivityScenarioControl {
@@ -154,6 +154,15 @@ class RemindersActivityTest : AutoCloseKoinTest() {
 
     @Test
     fun whenReminderAddedItShownInTheList() = runBlockingAndActivityScenarioControl {
+        addReminderFlow()
+        onView(withId(R.id.reminderssRecyclerView))
+            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
+            .check(matches(hasDescendant(withText(reminderData.title))))
+            .check(matches(hasDescendant(withText(reminderData.description))))
+    }
+
+    // Shared
+    private fun addReminderFlow() {
         onView(withId(R.id.addReminderFAB)).waitUntilVisible().perform(click())
         onView(withId(R.id.selectLocation)).waitUntilVisible().perform(click())
         onView(withId(R.id.map)).waitUntilVisible().perform(clickXY(200, 200))
@@ -161,10 +170,6 @@ class RemindersActivityTest : AutoCloseKoinTest() {
         onView(withId(R.id.reminderTitle)).perform(replaceText(reminderData.title))
         onView(withId(R.id.reminderDescription)).perform(replaceText(reminderData.description))
         onView(withId(R.id.saveReminder)).perform(clickXY(0, 0))
-        onView(withId(R.id.reminderssRecyclerView))
-            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
-            .check(matches(hasDescendant(withText(reminderData.title))))
-            .check(matches(hasDescendant(withText(reminderData.description))))
     }
 
 
