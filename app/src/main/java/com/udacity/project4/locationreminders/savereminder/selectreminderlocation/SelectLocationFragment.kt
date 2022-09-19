@@ -50,7 +50,6 @@ class SelectLocationFragment : Fragment(),
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { activityResult ->
             if (activityResult.resultCode == RESULT_OK) {
                 logD("Location on")
-                enableMapMyLocation()
             } else {
                 logD("Location off")
                 checkDeviceLocation(false)
@@ -158,10 +157,11 @@ class SelectLocationFragment : Fragment(),
 
     private fun checkDeviceLocation(resolve: Boolean = true) {
         logD()
+        enableMapMyLocation()
         LocationUtils.checkDeviceLocationSettings(
             requireActivity(),
             requestLocationSettingsOn,
-            onLocationEnabled = { enableMapMyLocation() },
+            onLocationEnabled = { },
             resolve
         )
     }
